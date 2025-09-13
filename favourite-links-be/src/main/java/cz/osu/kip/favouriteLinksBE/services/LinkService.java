@@ -9,12 +9,16 @@ import java.util.List;
 public class LinkService {
     private final LinkRepository linkRepository;
 
-
     public LinkService(LinkRepository linkRepository) {
         this.linkRepository = linkRepository;
     }
 
     public List<LinkEntity> getAll(){
         return linkRepository.findAll();
+    }
+
+    public LinkEntity create(LinkEntity entity) {
+        entity = this.linkRepository.save(entity);
+        return entity;
     }
 }

@@ -17,4 +17,8 @@ public class LinkEntity {
     @NonNull
     @Column(nullable = false)
     private String url;
+
+    @NonNull
+    @Column(nullable = false)
+    private String title;
 }

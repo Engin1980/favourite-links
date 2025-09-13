@@ -1,0 +1,22 @@
+meta {
+  name: Create link
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:12321/v1/links
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "url":"www.seznam.cz",
+    "title":"Seznam (CZ)"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

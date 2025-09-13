@@ -1,0 +1,15 @@
+meta {
+  name: Get links
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:12321/v1/links
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

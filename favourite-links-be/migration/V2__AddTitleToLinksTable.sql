@@ -1,0 +1,5 @@
+ALTER TABLE links
+    ADD title VARCHAR(255) NULL;
+
+ALTER TABLE links
+    MODIFY title VARCHAR(255) NOT NULL;
