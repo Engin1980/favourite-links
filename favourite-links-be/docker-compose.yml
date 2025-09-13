@@ -1,0 +1,16 @@
+services:
+  favourite-links-mariadb:
+    image: mariadb:11.4
+    container_name: favourite-links-mariadb
+    environment:
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MARIADB_DATABASE=${MARIADB_DATABASE}
+      - MARIADB_USER=${MARIADB_USER}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - favourite_links_mariadb_data:/var/lib/mysql
+
+volumes:
+  favourite_links_mariadb_data:
