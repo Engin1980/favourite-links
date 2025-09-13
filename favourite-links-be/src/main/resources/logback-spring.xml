@@ -1,0 +1,39 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/app.json</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/app.%d{yyyy-MM-dd}.json</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="cz.osu.kip.favouriteLinksBE" level="WARNING"/>
+
+    <logger name="cz.osu.kip.favouriteLinksBE.services" level="DEBUG"/>
+    <logger name="cz.osu.kip.favouriteLinksBE.aop.ServiceLoggingAspect" level="DEBUG"/>
+
+    <logger name="cz.osu.kip.favouriteLinksBE.controllers" level="DEBUG"/>
+    <logger name="cz.osu.kip.favouriteLinksBE.aop.ControllerLoggingAspect" level="DEBUG"/>
+
+    <root level="INFO"> <!-- change to WARN to suppress SpringBoot info logs -->
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE_JSON"/>
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>
