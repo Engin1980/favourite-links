@@ -1,0 +1,6 @@
+CREATE TABLE links
+(
+    id  INT AUTO_INCREMENT NOT NULL,
+    url VARCHAR(255) NOT NULL,
+    CONSTRAINT pk_links PRIMARY KEY (id)
+);
