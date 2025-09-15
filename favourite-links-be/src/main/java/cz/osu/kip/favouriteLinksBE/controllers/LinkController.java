@@ -4,6 +4,7 @@ import cz.osu.kip.favouriteLinksBE.mappers.LinkMapper;
 import cz.osu.kip.favouriteLinksBE.model.db.LinkEntity;
 import cz.osu.kip.favouriteLinksBE.model.dto.LinkCreateDto;
 import cz.osu.kip.favouriteLinksBE.model.dto.LinkDto;
+import cz.osu.kip.favouriteLinksBE.model.dto.LinkUpdateDto;
 import cz.osu.kip.favouriteLinksBE.services.LinkService;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,8 +33,17 @@ public class LinkController {
     public LinkDto create(@RequestBody LinkCreateDto dto) {
         LinkEntity entity = linkMapper.fromCreate(dto);
         LinkEntity created = linkService.create(entity);
-        System.out.println(created.getId());
         LinkDto result = linkMapper.to(created);
+        return result;
+    }
+
+    @PatchMapping(
+            path = "/{id}"
+    )
+    public LinkDto update(int id, @RequestBody LinkUpdateDto dto) {
+        LinkEntity entity = linkMapper.fromUpdate(id, dto);
+        LinkEntity updated = linkService.update(entity);
+        LinkDto result = linkMapper.to(updated);
         return result;
     }
 }
