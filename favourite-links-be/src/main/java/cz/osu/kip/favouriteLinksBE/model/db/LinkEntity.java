@@ -7,18 +7,17 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "links")
 public class LinkEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NonNull
+    @lombok.NonNull
     @Column(nullable = false)
     private String url;
 
-    @NonNull
+    @lombok.NonNull
     @Column(nullable = false)
     private String title;
 }

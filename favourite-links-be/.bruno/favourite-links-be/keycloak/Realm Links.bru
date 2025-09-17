@@ -1,0 +1,15 @@
+meta {
+  name: Realm Links
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:8080/realms/favourite-links-realm/.well-known/openid-configuration
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
