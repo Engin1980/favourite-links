@@ -44,6 +44,16 @@ ale musí se mu zapnout "Client Authentication"):
 
 > `Direct Access Grants Enabled` zajistí, že lze autentizovat uživatele pomocí uživatelského jména a hesla (Resource Owner Password Credentials Grant) uživatele v keycloak namísto autentizace klientského id.
 
+7. Vytvoření rolí
+    - Kliknout na `Client Scopes`
+    - Vybrat a zobrazit detail od `roles`
+    - Vybrat záložku `Mapers`
+    - Vytvořit nový mapper "by configuration":
+      - Vyplnit jméno mapperu a správné `client-id`
+      - Zadat `Token Claim Name` (např. `roles`)
+      - Zbytek dle potřeby
+      - Uložit
+
 ## Úprava nastavení projektu
 * Hesla a citlivé informace dávat do `.env` souboru.
 * Keycloak lze použít s pomocí knihovny `keycloak-admin`. 

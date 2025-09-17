@@ -1,4 +1,4 @@
 package cz.osu.kip.favouriteLinksBE.model.dto;
 
-public record UserCreateDto(String email, String password) {
+public record UserCreateDto(String email, String password, boolean isAdmin) {
 }

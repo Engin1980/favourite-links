@@ -11,69 +11,73 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("v1/users")
 public class UserController {
 
-    private final KeycloakService keycloakService;
-    private final UserService userService;
-    private final UserMapper userMapper;
-    private final Logger logger = LoggerFactory.getLogger(UserController.class);
+  private final KeycloakService keycloakService;
+  private final UserService userService;
+  private final UserMapper userMapper;
+  private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    public UserController(
-            @Autowired KeycloakService keycloakService,
-            @Autowired UserService userService,
-            @Autowired UserMapper userMapper) {
-        this.keycloakService = keycloakService;
-        this.userService = userService;
-        this.userMapper = userMapper;
+  public UserController(
+      @Autowired KeycloakService keycloakService,
+      @Autowired UserService userService,
+      @Autowired UserMapper userMapper) {
+    this.keycloakService = keycloakService;
+    this.userService = userService;
+    this.userMapper = userMapper;
+  }
+
+  @PostMapping
+  public void createUser(@RequestBody UserCreateDto data) {
+    String keycloakId = null;
+    try {
+      keycloakId = createKeycloakUser(data);
+      createDatabaseUser(data, keycloakId);
+    } catch (Exception e) {
+      if (keycloakId != null)
+        deleteKeycloakUser(keycloakId);
+      throw new AppException("Failed to create user in database: " + e.getMessage(), e);
+
     }
 
-    @PostMapping
-    public void createUser(@RequestBody UserCreateDto data) {
-        String keycloakId = null;
-        try {
-            keycloakId = createKeycloakUser(data);
-            createDatabaseUser(data, keycloakId);
-        } catch (Exception e) {
-            if (keycloakId != null)
-                deleteKeycloakUser(keycloakId);
-            throw new AppException("Failed to create user in database: " + e.getMessage(), e);
+    // TODO send email with activation link
+  }
 
-        }
-
-        // TODO send email with activation link
+  private void deleteKeycloakUser(String keycloakId) {
+    try {
+      keycloakService.deleteUser(keycloakId);
+    } catch (Exception e) {
+      logger.error("Failed to delete keycloak-user.", e);
     }
+  }
 
-    private void deleteKeycloakUser(String keycloakId) {
-        try {
-            keycloakService.deleteUser(keycloakId);
-        } catch (Exception e) {
-            logger.error("Failed to delete keycloak-user.", e);
-        }
+  private String createKeycloakUser(UserCreateDto data) {
+    String keycloakId;
+    try {
+      keycloakId = keycloakService.createUser(data.email(), data.password(), data.isAdmin());
+    } catch (Exception e) {
+      throw new AppException(
+          "Failed to create user in Keycloak: " + e.getMessage(), e);
     }
+    return keycloakId;
+  }
 
-    private String createKeycloakUser(UserCreateDto data) {
-        String keycloakId;
-        try {
-            keycloakId = keycloakService.createUser(data.email(), data.password());
-        } catch (Exception e) {
-            throw new AppException(
-                    "Failed to create user in Keycloak: " + e.getMessage(), e);
-        }
-        return keycloakId;
-    }
+  private void createDatabaseUser(UserCreateDto data, String keycloakId) {
+    UserEntity entity = userMapper.fromCreate(data);
+    entity.setKeycloakId(keycloakId);
+    userService.createUser(entity);
+  }
 
-    private void createDatabaseUser(UserCreateDto data, String keycloakId) {
-        UserEntity entity = userMapper.fromCreate(data);
-        entity.setKeycloakId(keycloakId);
-        userService.createUser(entity);
+  @DeleteMapping("{id}")
+  public void deleteUser(@PathVariable int id) {
+    Optional<UserEntity> user = userService.getUserById(id);
+    if (user.isPresent()) {
+      keycloakService.deleteUser(user.get().getKeycloakId());
+      userService.deleteUser(id);
     }
-
-    @DeleteMapping("{id}")
-    public void deleteUser(@PathVariable int id) {
-        UserEntity user = userService.getUserById(id);
-        keycloakService.deleteUser(user.getKeycloakId());
-        userService.deleteUser(id);
-    }
+  }
 }
