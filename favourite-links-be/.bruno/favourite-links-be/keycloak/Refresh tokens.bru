@@ -1,0 +1,18 @@
+meta {
+  name: Refresh tokens
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/realms/favourite-links-realm/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+body:form-urlencoded {
+  grant_type: refresh_token
+  client_id: springboot-client
+  refresh_token: eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0ZmM5OGM0My05NDU0LTRlMzMtOGJmZi0xNzNlYjQzNWY3NmEifQ.eyJleHAiOjE3NTgxMjUxNjUsImlhdCI6MTc1ODEyMzM2NSwianRpIjoiMzgwYjU1NzAtZWRkNC00ZDcxLWI1MDItMWI3MGEzYzgwNjgxIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9mYXZvdXJpdGUtbGlua3MtcmVhbG0iLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvcmVhbG1zL2Zhdm91cml0ZS1saW5rcy1yZWFsbSIsInN1YiI6IjE2MjFjZmRmLTJkYzMtNGJlZS1iNWI1LWQ0MTJlZjdlNTYxYiIsInR5cCI6IlJlZnJlc2giLCJhenAiOiJzcHJpbmdib290LWNsaWVudCIsInNpZCI6ImQzMTNhODg4LTA1MjctNGExNC1hYWIyLTE3NTc5ODdkNWY5NiIsInNjb3BlIjoid2ViLW9yaWdpbnMgcm9sZXMgYWNyIGJhc2ljIGVtYWlsIHByb2ZpbGUifQ.YevAJbNc5nNwZLftbrOaF5CtpwIa3VcgOp5KVsWjikOp2u-jMpsOKmmMSLbbivSRfe_HjI_iOT26lWWekh5CWg
+  : 
+}

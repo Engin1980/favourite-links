@@ -1,0 +1,19 @@
+meta {
+  name: Login
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/realms/favourite-links-realm/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+body:form-urlencoded {
+  client_id: springboot-client
+  username: marek.vajgl@osu.cz
+  password: Dudlajda#1
+  grant_type: password
+  ~client_secret: rYujj11jHxxqyGRpC1v6OUnVKMl9GrVs
+}

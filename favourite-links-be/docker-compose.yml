@@ -10,7 +10,19 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - favourite_links_mariadb_data:/var/lib/mysql
+      - mariadb-data:/var/lib/mysql
+
+  favourite-links-keycloak:
+    image: quay.io/keycloak/keycloak:25.0.0
+    container_name: favourite-links-keycloak
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    command: start-dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      - favourite-links-mariadb
 
 volumes:
-  favourite_links_mariadb_data:
+  mariadb-data:
