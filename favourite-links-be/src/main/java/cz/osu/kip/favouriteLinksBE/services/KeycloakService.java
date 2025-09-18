@@ -2,6 +2,7 @@ package cz.osu.kip.favouriteLinksBE.services;
 
 import cz.osu.kip.favouriteLinksBE.exceptions.AppException;
 import cz.osu.kip.favouriteLinksBE.exceptions.ServiceException;
+import cz.osu.kip.favouriteLinksBE.exceptions.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,7 +105,7 @@ public class KeycloakService {
       }
 
       // Přiřazení role uživateli
-      String roleJson = otherUtils.createUserJsonBody(roleId, roleString);
+      String roleJson = otherUtils.createUserRoleJsonBody(roleId, roleString);
 
       URI url = otherUtils.createUri(String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
           serverUrl, realm, userId));
@@ -387,7 +388,9 @@ public class KeycloakService {
     HttpResponse<String> response = getHttpResponse(request,
         e -> new ServiceException(this, String.format("Failed to login user with email: %s", email), e));
 
-    if (response.statusCode() != 200) {
+    if (response.statusCode() == 401) {
+      throw new UnauthorizedException();
+    } else if (response.statusCode() != 200) {
       throw new ServiceException(this,
           String.format("Login failed with status %d: %s",
               response.statusCode(), response.body()));
