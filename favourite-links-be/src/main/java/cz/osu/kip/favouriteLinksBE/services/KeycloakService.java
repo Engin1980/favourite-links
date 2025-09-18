@@ -1,5 +1,10 @@
 package cz.osu.kip.favouriteLinksBE.services;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.osu.kip.favouriteLinksBE.exceptions.AppException;
 import cz.osu.kip.favouriteLinksBE.exceptions.ServiceException;
 import cz.osu.kip.favouriteLinksBE.exceptions.UnauthorizedException;
@@ -16,7 +21,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -159,7 +166,6 @@ public class KeycloakService {
       }
     }
 
-
     private String createUser(String email, String password, String adminToken) {
       String userJson = otherUtils.createUserJsonBody(email, password);
 
@@ -219,6 +225,73 @@ public class KeycloakService {
       } catch (Exception ex) {
         logger.error("Failed to delete keycloak user '{}' in ignore-fail mode.", keycloakUserId);
       }
+    }
+
+    private List<KeycloakUserInternal> getAllUsers(String adminToken) {
+      URI url = otherUtils.createUri(String.format("%s/admin/realms/%s/users", serverUrl, realm));
+      HttpRequest request = HttpRequest.newBuilder()
+          .uri(url)
+          .header("Authorization", "Bearer " + adminToken)
+          .GET()
+          .build();
+
+      HttpResponse<String> response = getHttpResponse(request,
+          e -> new ServiceException(this, "Failed to get users from Keycloak", e));
+
+      if (response.statusCode() != 200) {
+        throw new ServiceException(this, "Failed to get users: " + response.body());
+      }
+
+      ObjectMapper mapper = new ObjectMapper();
+      List<KeycloakUserInternal> users;
+      try {
+        users = mapper.readValue(response.body(), new TypeReference<>() {
+        });
+      } catch (JsonProcessingException e) {
+        throw new ServiceException(this, "Failed to parse users from Keycloak", e);
+      }
+      return users;
+    }
+
+    private Role getUserRole(String userId, String adminToken) {
+      URI url = otherUtils.createUri(String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
+          serverUrl, realm, userId));
+      HttpRequest request = HttpRequest.newBuilder()
+          .uri(url)
+          .header("Authorization", "Bearer " + adminToken)
+          .GET()
+          .build();
+
+      HttpResponse<String> response = getHttpResponse(request,
+          e -> new ServiceException(this, String.format("Failed to get roles for user %s", userId), e));
+
+      if (response.statusCode() != 200) {
+        throw new ServiceException(this,
+            String.format("Getting user roles failed with status %d: %s",
+                response.statusCode(), response.body()));
+      }
+
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode rolesArray;
+      try {
+        rolesArray = mapper.readTree(response.body());
+      } catch (JsonProcessingException e) {
+        throw new ServiceException(this, "Failed to parse user roles from Keycloak", e);
+      }
+
+      // extract roles from rolesArray to list of strings
+      List<String> roleNames = new ArrayList<>();
+      for (JsonNode roleNode : rolesArray) {
+        roleNames.add(roleNode.get("name").asText());
+      }
+
+      if (roleNames.contains(Roles.ADMIN)) {
+        return Role.ADMIN;
+      } else if (roleNames.contains(Roles.USER)) {
+        return Role.USER;
+      } else
+        throw new ServiceException(this,
+            String.format("Keycloak User %s has no recognized role.", userId));
     }
   }
 
@@ -401,6 +474,30 @@ public class KeycloakService {
     String refreshToken = tokenData.get("refresh_token");
 
     return new LoginResult(accessToken, refreshToken);
+  }
+
+  public List<KeycloakUser> getAllUsers() {
+    String adminToken = keycloakUtils.getAdminAccessToken();
+
+    List<KeycloakUserInternal> users = keycloakUtils.getAllUsers(adminToken);
+    List<KeycloakUser> result = new ArrayList<>();
+    for (KeycloakUserInternal user : users) {
+      String userId = user.id;
+      String email = user.email;
+      Role role = keycloakUtils.getUserRole(userId, adminToken);
+      result.add(new KeycloakUser(userId, email, role));
+    }
+
+    return result;
+  }
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  private static class KeycloakUserInternal {
+    public String id;
+    public String email;
+  }
+
+  public record KeycloakUser(String id, String email, Role role) {
   }
 
   public LoginResult refreshToken(String refreshToken) {
