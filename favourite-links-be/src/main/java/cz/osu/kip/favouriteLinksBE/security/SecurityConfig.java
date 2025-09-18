@@ -18,7 +18,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
             .requestMatchers(HttpMethod.POST, "/v1/users","/v1/users/").permitAll()
             .requestMatchers(HttpMethod.POST, "/v1/users/refresh").permitAll()
-            .requestMatchers("/v1/users/list").hasAuthority(KeycloakService.SpringBootUserRoles.ADMIN)
+            .requestMatchers("/v1/users/list").hasAuthority(KeycloakService.Roles.ADMIN)
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 -> oauth2

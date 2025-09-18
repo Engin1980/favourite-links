@@ -26,17 +26,10 @@ public class KeycloakService {
     ADMIN, USER
   }
 
-  public static class SpringBootUserRoles {
-    public final static String ADMIN = "ADMIN";
-    public final static String USER = "USER";
-
-    public static String fromKeycloakUserRole(String keycloakRole) {
-      return switch (keycloakRole) {
-        case KeycloakUserRoles.ADMIN -> ADMIN;
-        case KeycloakUserRoles.USER -> USER;
-        default -> throw new IllegalArgumentException("Unknown Keycloak role: " + keycloakRole);
-      };
-    }
+  public static class Roles {
+    public final static String KC_ROLE_NAME_PREFIX = "KC_ROLE_";
+    public final static String ADMIN = KC_ROLE_NAME_PREFIX + "ADMIN";
+    public final static String USER = KC_ROLE_NAME_PREFIX + "USER";
 
     public static String fromRole(Role role) {
       return switch (role) {
@@ -46,14 +39,8 @@ public class KeycloakService {
     }
   }
 
-  public static class KeycloakUserRoles {
-    public final static String ROLE_NAME_PREFIX = "be_role_";
-    public final static String ADMIN = ROLE_NAME_PREFIX + "admin";
-    public final static String USER = ROLE_NAME_PREFIX + "user";
-  }
-
   class KeycloakUtils {
-    public String getAdminAccessToken() {
+    private String getAdminAccessToken() {
       Map<String, String> params = new HashMap<>();
       params.put("grant_type", CLIENT_CREDENTIALS);
       params.put("client_id", adminClientId);
@@ -81,7 +68,7 @@ public class KeycloakService {
       return tokenData.get("access_token");
     }
 
-    public String getRoleId(String roleName, String adminToken) {
+    private String getRoleId(String roleName, String adminToken) {
       URI url = otherUtils.createUri(String.format("%s/admin/realms/%s/roles/%s",
           serverUrl, realm, roleName));
 
@@ -108,11 +95,8 @@ public class KeycloakService {
       return roleData.get("id");
     }
 
-    public void assignRoleToUser(String userId, Role role, String adminToken) {
-      String roleString = switch (role) {
-        case ADMIN -> KeycloakUserRoles.ADMIN;
-        case USER -> KeycloakUserRoles.USER;
-      };
+    private void assignRoleToUser(String userId, Role role, String adminToken) {
+      String roleString = Roles.fromRole(role);
       // Získání ID role podle názvu
       String roleId = keycloakUtils.getRoleId(roleString, adminToken);
       if (roleId == null) {
@@ -120,12 +104,7 @@ public class KeycloakService {
       }
 
       // Přiřazení role uživateli
-      String roleJson = String.format("""
-          [{
-              "id": "%s",
-              "name": "%s"
-          }]
-          """, roleId, roleString);
+      String roleJson = otherUtils.createUserJsonBody(roleId, roleString);
 
       URI url = otherUtils.createUri(String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
           serverUrl, realm, userId));
@@ -147,11 +126,8 @@ public class KeycloakService {
       }
     }
 
-    public void removeRoleFromUser(String userId, Role role, String adminToken) {
-      String roleString = switch (role) {
-        case ADMIN -> KeycloakUserRoles.ADMIN;
-        case USER -> KeycloakUserRoles.USER;
-      };
+    private void removeRoleFromUser(String userId, Role role, String adminToken) {
+      String roleString = Roles.fromRole(role);
 
       // Získání ID role podle názvu
       String roleId = keycloakUtils.getRoleId(roleString, adminToken);
@@ -160,12 +136,7 @@ public class KeycloakService {
       }
 
       // Odebrání role uživateli
-      String roleJson = String.format("""
-          [{
-              "id": "%s",
-              "name": "%s"
-          }]
-          """, roleId, roleString);
+      String roleJson = otherUtils.createUserRoleJsonBody(roleId, roleString);
 
       URI url = otherUtils.createUri(String.format("%s/admin/realms/%s/users/%s/role-mappings/realm",
           serverUrl, realm, userId));
@@ -187,7 +158,8 @@ public class KeycloakService {
       }
     }
 
-    public String createUser(String email, String password, String adminToken) {
+
+    private String createUser(String email, String password, String adminToken) {
       String userJson = otherUtils.createUserJsonBody(email, password);
 
       URI url = otherUtils.createUri(String.format("%s/admin/realms/%s/users", serverUrl, realm));
@@ -215,7 +187,7 @@ public class KeycloakService {
       return keycloakUserId;
     }
 
-    public void deleteUser(String userId, String adminToken) {
+    private void deleteUser(String userId, String adminToken) {
       URI url = otherUtils.createUri(String.format("%s/admin/realms/%s/users/%s", serverUrl, realm, userId));
       HttpRequest request = HttpRequest.newBuilder()
           .uri(url)
@@ -240,7 +212,7 @@ public class KeycloakService {
       }
     }
 
-    public void deleteUserIgnoreFail(String keycloakUserId, String adminToken) {
+    private void deleteUserIgnoreFail(String keycloakUserId, String adminToken) {
       try {
         deleteUser(keycloakUserId, adminToken);
       } catch (Exception ex) {
@@ -250,7 +222,7 @@ public class KeycloakService {
   }
 
   static class OtherUtils {
-    public String createUserJsonBody(String email, String password) {
+    private String createUserJsonBody(String email, String password) {
       String userJson = String.format("""
           {
               "username": "%s",
@@ -267,7 +239,17 @@ public class KeycloakService {
       return userJson;
     }
 
-    public URI createUri(String url) {
+    private String createUserRoleJsonBody(String roleId, String roleString) {
+      String roleJson = String.format("""
+          [{
+              "id": "%s",
+              "name": "%s"
+          }]
+          """, roleId, roleString);
+      return roleJson;
+    }
+
+    private URI createUri(String url) {
       URI ret;
       try {
         ret = new URI(url);

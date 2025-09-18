@@ -1,8 +1,8 @@
 package cz.osu.kip.favouriteLinksBE.security;
 
 import cz.osu.kip.favouriteLinksBE.services.KeycloakService;
+import jakarta.annotation.Nullable;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.lang.NonNullApi;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,7 +17,9 @@ public class KeycloakRealmRoleConverter implements Converter<Jwt, AbstractAuthen
   private final JwtAuthenticationConverter delegate = new JwtAuthenticationConverter();
 
   @Override
-  public AbstractAuthenticationToken convert(Jwt jwt) {
+  public AbstractAuthenticationToken convert(@Nullable Jwt jwt) {
+    if (jwt == null) return null;
+
     Collection<GrantedAuthority> authorities = extractRealmRoles(jwt);
 
     // necháme původní converter vygenerovat token
@@ -41,8 +43,7 @@ public class KeycloakRealmRoleConverter implements Converter<Jwt, AbstractAuthen
     }
 
     roles = roles.stream()
-        .filter(q->q.startsWith(KeycloakService.KeycloakUserRoles.ROLE_NAME_PREFIX))
-        .map(KeycloakService.SpringBootUserRoles::fromKeycloakUserRole)
+        .filter(q -> q.startsWith(KeycloakService.Roles.KC_ROLE_NAME_PREFIX))
         .toList();
 
     return roles.stream()
