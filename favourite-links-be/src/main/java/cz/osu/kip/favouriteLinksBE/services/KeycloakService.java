@@ -30,11 +30,26 @@ public class KeycloakService {
     public final static String ADMIN = "ADMIN";
     public final static String USER = "USER";
 
+    public static String fromKeycloakUserRole(String keycloakRole) {
+      return switch (keycloakRole) {
+        case KeycloakUserRoles.ADMIN -> ADMIN;
+        case KeycloakUserRoles.USER -> USER;
+        default -> throw new IllegalArgumentException("Unknown Keycloak role: " + keycloakRole);
+      };
+    }
+
+    public static String fromRole(Role role) {
+      return switch (role) {
+        case ADMIN -> ADMIN;
+        case USER -> USER;
+      };
+    }
   }
 
   public static class KeycloakUserRoles {
-    public final static String KEYCLOAK_ADMIN = "be_role_admin";
-    public final static String KEYCLOAK_USER = "be_role_user";
+    public final static String ROLE_NAME_PREFIX = "be_role_";
+    public final static String ADMIN = ROLE_NAME_PREFIX + "admin";
+    public final static String USER = ROLE_NAME_PREFIX + "user";
   }
 
   class KeycloakUtils {
@@ -95,8 +110,8 @@ public class KeycloakService {
 
     public void assignRoleToUser(String userId, Role role, String adminToken) {
       String roleString = switch (role) {
-        case ADMIN -> KeycloakUserRoles.KEYCLOAK_ADMIN;
-        case USER -> KeycloakUserRoles.KEYCLOAK_USER;
+        case ADMIN -> KeycloakUserRoles.ADMIN;
+        case USER -> KeycloakUserRoles.USER;
       };
       // Získání ID role podle názvu
       String roleId = keycloakUtils.getRoleId(roleString, adminToken);
@@ -134,8 +149,8 @@ public class KeycloakService {
 
     public void removeRoleFromUser(String userId, Role role, String adminToken) {
       String roleString = switch (role) {
-        case ADMIN -> KeycloakUserRoles.KEYCLOAK_ADMIN;
-        case USER -> KeycloakUserRoles.KEYCLOAK_USER;
+        case ADMIN -> KeycloakUserRoles.ADMIN;
+        case USER -> KeycloakUserRoles.USER;
       };
 
       // Získání ID role podle názvu
