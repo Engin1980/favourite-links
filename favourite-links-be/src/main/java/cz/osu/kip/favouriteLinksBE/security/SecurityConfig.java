@@ -20,6 +20,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
             .requestMatchers(HttpMethod.POST, "/v1/users", "/v1/users/").permitAll()
             .requestMatchers(HttpMethod.POST, "/v1/users/refresh").permitAll()
+            .requestMatchers(HttpMethod.GET, "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
             .requestMatchers("/v1/users/list").hasAuthority(KeycloakService.Roles.ADMIN)
             .anyRequest().authenticated()
         )
