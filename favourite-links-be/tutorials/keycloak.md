@@ -28,7 +28,8 @@ Alternativně lze použít `admin-cli`, ale musí se mu zapnout "Client Authenti
 5. Uložit
    
 Dále v detailu klienta:
-6. V zálžoce `Service Account Roles` přidat roli `manage-users` z `realm-management` (pozor, je možná až na druhé stránce seznamu rolí)
+6. V záložce `Service Account Roles` přidat roli `manage-users` z `realm-management` (pozor, je možná až na druhé stránce seznamu rolí)
+7. V záložce `Service Account Roles` přidat roli `view-realm` z `realm-management` (pozor, je možná až na druhé stránce seznamu rolí)
 7. Zkopírovat si hodnotu `Secret` z detailu klienta (v záložce `Credentials`)
 
 > `manage-users` role umožňuje vytvářet, mazat a upravovat uživatele uvnitř daného realmu v Keycloak
@@ -36,7 +37,7 @@ Dále v detailu klienta:
 ### 3. Vytvoření klienta pro přihlašování a práci s tokeny
 1. Kliknout na `Clients` v levém menu
 2. Kliknout na `Create client`
-3. Vyplnit `Client ID` (např. `favourite-links-frontend`)
+3. Vyplnit `Client ID` (např. `springboot-client`)
 4. V nastavení klienta zvolit "Direct Access Grants Enabled"
 5. Uložit
 
@@ -59,15 +60,16 @@ Cílem je nastavit uživatelům, že se mají přihlašovat e-mailem a že není
 1. Kliknout na `Client Scopes`
 2. Vybrat a zobrazit detail od `roles`
 3. Vybrat záložku `Mapers`
-4. Vytvořit nový mapper "by configuration":
+4. Vytvořit nový mapper "by configuration" - nebo upravit existující `roles`:
     - vybrat mapper podle konfigurace `User Realm Role`
     - Vyplnit jméno mapperu
-    - Zadat `Token Claim Name` (např. `roles`)
     - vložit token claim name (např. `roles`) - pod tímhle klíčem bude v tokenu
     - nastavit `Multivalued` na ON - těch rolí je několik a naše je jen jedna z nich
+    - Zaškrtnout `Add to ID token` a `Add to access token`, aby byly v tokenu
+    - Uložit
 
 **Nastavení klienta, aby client scope/mapper používal**
-1. Přejít na `Clients`, vybrat klienta pro ověřování uživatelů (`favourite-links-frontend`), záložka `Client Scopes`
+1. Přejít na `Clients`, vybrat klienta pro ověřování uživatelů (`springboot-client`), záložka `Client Scopes`
 2. V ní přidat do `Client Scopes` scope `roles` jako `default`
 
 ### 7. Refresh Token Rotation in Keycloak
@@ -77,6 +79,7 @@ Nastavit lze na (upravit realm name):
 http://localhost:8080/admin/master/console/#/favourite-links-realm/realm-settings/tokens
 
 ## Další info
+* Realm je třeba duplikovat pro testovací prostředí.
 * Hesla a citlivé informace dávat do `.env` souboru.
 * Keycloak lze použít s pomocí knihovny `keycloak-admin`. 
     - Knihovna však nepodporuje rozumnou implementaci refresh tokenů.

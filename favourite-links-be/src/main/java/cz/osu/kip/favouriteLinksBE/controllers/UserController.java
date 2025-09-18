@@ -1,6 +1,7 @@
 package cz.osu.kip.favouriteLinksBE.controllers;
 
 import cz.osu.kip.favouriteLinksBE.exceptions.AppException;
+import cz.osu.kip.favouriteLinksBE.exceptions.EntityAlreadyExistsException;
 import cz.osu.kip.favouriteLinksBE.mappers.UserMapper;
 import cz.osu.kip.favouriteLinksBE.model.db.UserEntity;
 import cz.osu.kip.favouriteLinksBE.model.dto.UserCreateDto;
@@ -36,6 +37,11 @@ public class UserController {
 
   @PostMapping
   public void createUser(@RequestBody UserCreateDto data) {
+    if (userService.getUserByEmail(data.email()).isPresent())
+      throw new EntityAlreadyExistsException(
+          UserEntity.class,
+          String.format("email == '%s'", data.email()));
+
     String keycloakId = null;
     try {
       keycloakId = createKeycloakUser(data);
@@ -44,7 +50,6 @@ public class UserController {
       if (keycloakId != null)
         deleteKeycloakUser(keycloakId);
       throw new AppException("Failed to create user in database: " + e.getMessage(), e);
-
     }
 
     // TODO send email with activation link
