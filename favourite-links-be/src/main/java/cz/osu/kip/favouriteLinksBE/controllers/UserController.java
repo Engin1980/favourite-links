@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -51,8 +52,19 @@ public class UserController {
 
   @GetMapping("/list")
   public List<UserDto> listUsers() {
-    List<UserEntity> users = userService.getAllUsers();
-    List<UserDto> userDtos = users.stream().map(userMapper::to).toList();
+    List<UserEntity> dbUsers = userService.getAllUsers();
+    List<KeycloakService.KeycloakUser> kcUsers = keycloakService.getAllUsers();
+
+    Map<String, UserEntity> dbUsersMap = dbUsers.stream()
+        .collect(java.util.stream.Collectors.toMap(UserEntity::getKeycloakId, u -> u));
+
+    List<UserDto> userDtos = kcUsers.stream()
+        .map(kcUser -> {
+          UserEntity dbUser = dbUsersMap.get(kcUser.id());
+          if (dbUser == null)
+            throw new AppException("Failed to find Db-User for keycloak user: " + kcUser.email());
+          return new UserDto(dbUser.getId(), kcUser.id(), kcUser.email(), kcUser.role() == KeycloakService.Role.ADMIN);
+        }).toList();
     return userDtos;
   }
 
