@@ -4,6 +4,7 @@ import cz.osu.kip.favouriteLinksBE.exceptions.AppException;
 import cz.osu.kip.favouriteLinksBE.mappers.UserMapper;
 import cz.osu.kip.favouriteLinksBE.model.db.UserEntity;
 import cz.osu.kip.favouriteLinksBE.model.dto.UserCreateDto;
+import cz.osu.kip.favouriteLinksBE.model.dto.UserDto;
 import cz.osu.kip.favouriteLinksBE.services.KeycloakService;
 import cz.osu.kip.favouriteLinksBE.services.UserService;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -45,6 +47,13 @@ public class UserController {
     }
 
     // TODO send email with activation link
+  }
+
+  @GetMapping("/list")
+  public List<UserDto> listUsers() {
+    List<UserEntity> users = userService.getAllUsers();
+    List<UserDto> userDtos = users.stream().map(userMapper::to).toList();
+    return userDtos;
   }
 
   private void deleteKeycloakUser(String keycloakId) {

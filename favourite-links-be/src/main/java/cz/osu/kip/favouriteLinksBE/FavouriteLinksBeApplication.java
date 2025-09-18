@@ -1,9 +1,11 @@
 package cz.osu.kip.favouriteLinksBE;
 
+import cz.osu.kip.favouriteLinksBE.controllers.UserController;
 import cz.osu.kip.favouriteLinksBE.model.db.UserEntity;
 import cz.osu.kip.favouriteLinksBE.services.KeycloakService;
 import cz.osu.kip.favouriteLinksBE.services.UserService;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -24,11 +26,11 @@ public class FavouriteLinksBeApplication {
   public CommandLineRunner createGenericAdminIfRequired(
       @Autowired UserService userService,
       @Autowired KeycloakService keycloakService,
-      @Autowired Logger logger,
       @Value("${app.generic-admin-ensure-exists}") boolean createGenericAdminIfRequired,
       @Value("${app.generic-admin-email}") String genericAdminEmail,
       @Value("${app.generic-admin-password}") String genericAdminPassword
   ) {
+    Logger logger = LoggerFactory.getLogger(FavouriteLinksBeApplication.class);
     return args -> {
       if (!createGenericAdminIfRequired) return;
       Optional<UserEntity> admin = userService.getUserByEmail(genericAdminEmail);

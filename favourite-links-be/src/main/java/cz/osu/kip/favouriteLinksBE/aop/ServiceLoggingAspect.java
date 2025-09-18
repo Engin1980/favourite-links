@@ -28,7 +28,7 @@ public class ServiceLoggingAspect {
     @AfterReturning(pointcut = "execution(* cz.osu.kip.favouriteLinksBE.services..*(..))", returning = "result")
     public void logAfterService(JoinPoint joinPoint, Object result) {
         String resultStr =
-                result == null ? "(null)" :
+                result == null ? "(void)" :
                 result instanceof List ? "List (#" + ((List<?>) result).size() + ")" :
                         result.getClass().isArray() ? "Array (# " + ((Object[]) result).length + ")" :
                                 String.valueOf(result);

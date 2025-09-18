@@ -7,6 +7,7 @@ import cz.osu.kip.favouriteLinksBE.model.db.UserEntity;
 import cz.osu.kip.favouriteLinksBE.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -44,5 +45,9 @@ public class UserService {
   public Optional<UserEntity> getUserByEmail(String email) {
     Optional<UserEntity> ret = userRepository.findByEmail(email);
     return ret;
+  }
+
+  public List<UserEntity> getAllUsers() {
+    return userRepository.findAll();
   }
 }

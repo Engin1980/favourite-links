@@ -45,14 +45,24 @@ ale musí se mu zapnout "Client Authentication"):
 > `Direct Access Grants Enabled` zajistí, že lze autentizovat uživatele pomocí uživatelského jména a hesla (Resource Owner Password Credentials Grant) uživatele v keycloak namísto autentizace klientského id.
 
 7. Vytvoření rolí
-    - Kliknout na `Client Scopes`
-    - Vybrat a zobrazit detail od `roles`
-    - Vybrat záložku `Mapers`
-    - Vytvořit nový mapper "by configuration":
-      - Vyplnit jméno mapperu a správné `client-id`
-      - Zadat `Token Claim Name` (např. `roles`)
-      - Zbytek dle potřeby
-      - Uložit
+   - Kliknout na `Client Scopes`
+   - Vybrat a zobrazit detail od `roles`
+   - Vybrat záložku `Mapers`
+   - Vytvořit nový mapper "by configuration":
+     - Vyplnit jméno mapperu a správné `client-id`
+     - Zadat `Token Claim Name` (např. `roles`)
+     - Zbytek dle potřeby
+     - Uložit
+
+8. Nechť keycloak přidává role do JWT
+   - Vytvořit v `Client Scopes` nový scope `roles`
+   - U něj v `Mappers` přidat nový mapper
+   - vybrat mapper podle konfigurace `User Realm Role`
+   - vložit název mapperu
+   - vložit token claim name (např. `roles`) - pod tímhle klíčem bude v tokenu
+   - nastavit `Multivalued` na ON - těch rolí je několik a naše je jen jedna z nich
+   - Přejít na `Clients`, vybrat klienta pro ověřování uživatelů (`favourite-links-frontend`), záložka `Client Scopes`
+   - V ní přidat do `Client Scopes` scope `roles` jako `default`
 
 ## Úprava nastavení projektu
 * Hesla a citlivé informace dávat do `.env` souboru.

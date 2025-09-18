@@ -34,13 +34,7 @@ public class KeycloakRealmRoleConverter implements Converter<Jwt, AbstractAuthen
   }
 
   private Collection<GrantedAuthority> extractRealmRoles(Jwt jwt) {
-    Map<String, Object> realmAccess = jwt.getClaim("realm_access");
-    if (realmAccess == null || realmAccess.isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    @SuppressWarnings("unchecked")
-    List<String> roles = (List<String>) realmAccess.get("roles");
+    List<String> roles = jwt.getClaim("roles");
 
     if (roles == null) {
       return Collections.emptyList();
